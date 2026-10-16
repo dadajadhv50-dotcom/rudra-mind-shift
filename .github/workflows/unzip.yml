@@ -1,0 +1,53 @@
+name: Auto Unzip and Setup Repository
+
+on:
+  workflow_dispatch: # मैन्युअली बटन दबाकर चलाने के लिए
+  push:
+    paths:
+      - '**.zip' # जब भी कोई ज़िप फ़ाइल अपलोड होगी, यह अपने आप चल जाएगा
+
+permissions:
+  contents: write # रिपॉजिटरी में फ़ाइलें सेव और डिलीट करने की परमिशन
+
+jobs:
+  unzip-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract ZIP File
+        run: |
+          # ज़िप फ़ाइल का नाम सेट करें
+          ZIP_NAME="RUDRA_MIND_SHIFT_GitHub.zip"
+
+          if [ -f "$ZIP_NAME" ]; then
+            echo "ज़िप फ़ाइल मिल गई, एक्सट्रैक्ट किया जा रहा है..."
+            unzip -o "$ZIP_NAME" -d temp_extracted/
+
+            # अगर अनज़िप करने पर अंदर एक ही मुख्य फ़ोल्डर बना हो, तो उसके अंदर का सारा माल बाहर लाएं
+            if [ $(ls -1 temp_extracted | wc -l) -eq 1 ] && [ -d temp_extracted/* ]; then
+              mv temp_extracted/*/* . 2>/dev/null || true
+              mv temp_extracted/*/.* . 2>/dev/null || true
+            else
+              mv temp_extracted/* . 2>/dev/null || true
+              mv temp_extracted/.* . 2>/dev/null || true
+            fi
+
+            # अस्थायी फ़ोल्डर और पुरानी ज़िप फ़ाइल को हटाएं
+            rm -rf temp_extracted
+            rm -f "$ZIP_NAME"
+            echo "एक्सट्रैक्शन पूरा हुआ और ज़िप फ़ाइल हटा दी गई।"
+          else
+            echo "ज़िप फ़ाइल नहीं मिली!"
+            exit 1
+          fi
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Auto: Unzipped project files and removed zip" || exit 0
+          git push
+          
