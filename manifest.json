@@ -1,0 +1,17 @@
+{
+  "name": "RUDRA MIND SHIFT",
+  "short_name": "RUDRA SHIFT",
+  "description": "Futuristic memory and logic puzzle game",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080a18",
+  "theme_color": "#080a18",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
